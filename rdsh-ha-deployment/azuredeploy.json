@@ -78,7 +78,9 @@
     "lbNatAddressPoolName": "natBackendAddressPool",
     "lbGwRdpNatRule": "gwRdpNatRule",
     "lbPdcRdpNatRule": "pdcRdpNatRule",
-    "lbBdcRdpNatRule": "bdcRdpNatRule"
+    "lbBdcRdpNatRule": "bdcRdpNatRule",
+
+    "adHaDeploymentUri": "[concat(variables('assetLocation'),'/templates/ad-ha-deployment.json')]"
   },
   "resources": [
     {
@@ -168,7 +170,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[variables('lbTemplateUri')]",
+          "uri": "[variables('adHaDeploymentUri')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
