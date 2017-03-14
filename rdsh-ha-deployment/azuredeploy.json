@@ -1,0 +1,170 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "tenantDnsPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Unique tenant dns prefix"
+      },
+      "defaultValue": "[concat('ventoo-cust-', 'GEN-UNIQUE')]"
+    },
+
+    "tenantIdentifier": {
+      "type": "string",
+      "metadata": {
+        "description": "Unique tenant identifier"
+      }
+    },
+    "gwdnsLabelPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Unique gateway public DNS prefix. The fqdn will look something like 'prefix.region.cloudapp.azure.com'. Up to 62 chars, digits or dashes, lowercase, should start with a letter."
+      }
+    },
+    "adDomainName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the AD domain."
+      },
+      "defaultValue": "corp.onventoo.com"
+    },
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the domain admin. Can't be 'administrator' or 'user'."
+      },
+      "defaultValue": "admin"
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The password for the administrator account of the new VM and the domain"
+      }
+    },
+    "numberOfGatewayInstances": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Initial number of RD Gateways"
+      }
+    },
+    "numberOfRdshInstances": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Initial number of RD Session Hosts"
+      }
+    },
+    "rdshVmSize": {
+      "type": "string",
+      "allowedValues": [
+        "Standard_A2m_V2",
+        "Standard_A4m_V2",
+        "Standard_A8m_V2",
+        "Standard_DS11_V2",
+        "Standard_DS12_V2",
+        "Standard_DS13_V2",
+        "Standard_DS14_V2",
+        "Standard_DS15_V2"
+      ],
+      "metadata": {
+        "description": "The size of the RD Session Host VMs"
+      },
+      "defaultValue": "Standard_Ds11_V2"
+    }
+  },
+  "variables": {
+    "assetLocation": "https://raw.githubusercontent.com/ventoo/Azure-Deployments/master/rdsh-ha-deployment",
+    "publicIpAddressName": "tenantPip",
+    "publicIpAddressType": "Dynamic",
+
+    "vnetTemplateUri": "[concat(variables('assetLocation'),'/templates/vnet.json')]",
+    "virtualNetworkName": "tenantNetwork",
+    "virtualNetworkRange": "10.0.0.0/16",
+    "subnetName": "defaultSubnet",
+    "subnetRange": "10.0.0.0/24",
+
+    "lbTemplateUri": "[concat(variables('assetLocation'),'/templates/loadBalancer.json')]",
+    "lbLbAddressPoolName": "lbBackendAddressPool",
+    "lbNatAddressPoolName": "natBackendAddressPool",
+    "lbGwRdpNatRule": "gwRdpNatRule",
+    "lbPdcRdpNatRule": "pdcRdpNatRule",
+    "lbBdcRdpNatRule": "bdcRdpNatRule"
+  },
+  "resources": [
+    {
+      "name": "[variables('publicIPAddressName')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2016-10-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('tenantDnsPrefix')]"
+        }
+      }
+    },
+    {
+      "name": "VNet",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('vnetTemplateUri')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "virtualNetworkName": {
+            "value": "[variables('virtualNetworkName')]"
+          },
+          "virtualNetworkAddressRange": {
+            "value": "[variables('virtualNetworkRange')]"
+          },
+          "subnetName": {
+            "value": "[variables('subnetName')]"
+          },
+          "subnetRange": {
+            "value": "[variables('subnetRange')]"
+          }
+        }
+      }
+    },
+    {
+      "name": "LoadBalancer",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('lbTemplateUri')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "lbName": {
+            "value": "tenantMainLb"
+          },
+          "publicIpAddressName": {
+            "value": "[variables('publicIPAddressName')]"
+          },
+          "lbBackendPoolName": {
+            "value": "[variables('lbLbAddressPoolName')]"
+          },
+          "natBackendPoolName": {
+            "value": "[variables('lbNatAddressPoolName')]"
+          },
+          "gwRdpNatRuleName": {
+            "value": "[variables('lbGwRdpNatRule')]"
+          },
+          "pdcRdpNatRuleName": {
+            "value": "[variables('lbPdcRdpNatRule')]"
+          },
+          "bdcRdpNatRuleName": {
+            "value": "[variables('lbBdcRdpNatRule')]"
+          }
+        }
+      }
+    }
+  ]
+}
