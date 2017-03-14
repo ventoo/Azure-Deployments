@@ -67,6 +67,9 @@
     "lbBackendAddressPool": {
         "type": "string"
     },
+    "lbName": {
+        "type": "string"
+    },
     "adminUsername": {
       "type": "string",
       "metadata": {
@@ -166,7 +169,7 @@
   "variables": {
     "VnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
     "adSubnetRef": "[concat(variables('VnetID'),'/subnets/',parameters('subnetName'))]",
-    "adLBName": "adLoadBalancer",
+    "adLBName": "[parameters('lbName')]",
     "adlbID": "[resourceId('Microsoft.Network/loadBalancers',variables('adLBName'))]",
     "adPDCRDPNATRuleID": "[concat(variables('adlbID'),'/inboundNatRules/',parameters('adPdcNatRuleName'))]",
     "adBDCRDPNATRuleID": "[concat(variables('adlbID'),'/inboundNatRules/',parameters('adBdcNatRuleName'))]",

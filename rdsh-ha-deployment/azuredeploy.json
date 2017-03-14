@@ -201,6 +201,9 @@
           "lbBackendAddressPool": {
               "value": "[variables('lbNatAddressPoolName')]"
           },
+          "lbName": {
+              "value": "tenantMainLb"
+          },
           "adminUsername": {
             "value": "[parameters('adminUsername')]"
           },
