@@ -7,7 +7,7 @@
       "metadata": {
         "description": "Unique tenant dns prefix"
       },
-      "defaultValue": "[concat('ventoo-cust-', 'GEN-UNIQUE')]"
+      "defaultValue": "[toLower(concat('ventoo-cust-', uniqueString(resourceGroup().id)))]"
     },
     "adDomainName": {
       "type": "string",
@@ -153,6 +153,63 @@
           },
           "bdcRdpNatRuleName": {
             "value": "[variables('lbBdcRdpNatRule')]"
+          }
+        }
+      }
+    },
+    {
+      "name": "AdDeployment",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [
+        "Microsoft.Resources/deployments/VNet",
+        "Microsoft.Resources/deployments/LoadBalancer"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('lbTemplateUri')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "virtualNetworkName": {
+            "value": "[variables('virtualNetworkName')]"
+          },
+          "virtualNetworkRange": {
+            "value": "[variables('virtualNetworkRange')]"
+          },
+          "subnetName": {
+            "value": "[variables('subnetName')]"
+          },
+          "subnetRange": {
+            "value": "[variables('subnetRange')]"
+          },
+          "adPDCNicIPAddress": {
+            "value": "10.0.0.4"
+          },
+          "adPdcNatRuleName": {
+              "value": "[variables('lbPdcRdpNatRule')]"
+          },
+          "adBDCNicIPAddress": {
+            "value": "10.0.0.5"
+          },
+          "adBdcNatRuleName": {
+              "value": "[variables('lbBdcRdpNatRule')]"
+          },
+          "lbBackendAddressPool": {
+              "value": "[variables('lbNatAddressPoolName')]"
+          },
+          "adminUsername": {
+            "value": "[parameters('adminUsername')]"
+          },
+          "adminPassword": {
+            "value": "[parameters('adminPassword')]"
+          },
+          "domainName": {
+            "value": "[parameters('adDomainName')]"
+          },
+          "adVMSize": {
+            "value": "Standard_DS1_v2"
           }
         }
       }
