@@ -9,19 +9,6 @@
       },
       "defaultValue": "[concat('ventoo-cust-', 'GEN-UNIQUE')]"
     },
-
-    "tenantIdentifier": {
-      "type": "string",
-      "metadata": {
-        "description": "Unique tenant identifier"
-      }
-    },
-    "gwdnsLabelPrefix": {
-      "type": "string",
-      "metadata": {
-        "description": "Unique gateway public DNS prefix. The fqdn will look something like 'prefix.region.cloudapp.azure.com'. Up to 62 chars, digits or dashes, lowercase, should start with a letter."
-      }
-    },
     "adDomainName": {
       "type": "string",
       "metadata": {
@@ -40,7 +27,8 @@
       "type": "securestring",
       "metadata": {
         "description": "The password for the administrator account of the new VM and the domain"
-      }
+      },
+      "defaultValue": "MyAccPa$$001"
     },
     "numberOfGatewayInstances": {
       "type": "int",
@@ -135,6 +123,9 @@
       "name": "LoadBalancer",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2016-09-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+      ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
