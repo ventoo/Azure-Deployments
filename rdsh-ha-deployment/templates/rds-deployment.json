@@ -215,11 +215,7 @@
                   "id": "[variables('gwBeAddressPoolId')]"
                 }
               ],
-              "loadBalancerInboundNatRules": [
-                {
-                  "id": "[variables('gwNatRuleNameId')]"
-                }
-              ]
+              "loadBalancerInboundNatRules": [ ]
             }
           }
         ],
