@@ -21,7 +21,7 @@
       "metadata": {
         "description": "The name of the domain admin. Can't be 'administrator' or 'user'."
       },
-      "defaultValue": "admin"
+      "defaultValue": "VentooAdmin"
     },
     "adminPassword": {
       "type": "securestring",
