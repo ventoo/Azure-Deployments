@@ -328,7 +328,7 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2016-04-30-preview",
       "dependsOn": [
-        "[concat('Network/networkInterfaces/', parameters('cbNicName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', parameters('cbNicName'))]",
         "rdshVmLoop"
       ],
       "properties": {
@@ -422,8 +422,8 @@
             "typeHandlerVersion": "2.19",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              "ModulesUrl": "[concat(variables('assetLocation'),'/Configuration.zip')]",
-              "ConfigurationFunction": "Configuration.ps1\\Gateway",
+              "ModulesUrl": "[concat(variables('assetLocation'),'/DSC/ConfigureRDSH.zip')]",
+              "ConfigurationFunction": "ConfigureRDSH.ps1\\Gateway",
               "properties": {
                 "DomainName": "[parameters('domainName')]",
                 "AdminCreds": {
@@ -461,8 +461,8 @@
         },
         "publisher": "Microsoft.Powershell",
         "settings": {
-          "modulesUrl": "[concat(variables('assetLocation'),'/Configuration.zip')]",
-          "configurationFunction": "Configuration.ps1\\RDSDeployment",
+          "modulesUrl": "[concat(variables('assetLocation'),'/ConfigureRDSH.zip')]",
+          "configurationFunction": "ConfigureRDSH.ps1\\RDSDeployment",
           "Properties": {
             "adminCreds": {
               "UserName": "[parameters('adminUsername')]",

@@ -234,47 +234,49 @@
           "uri": "[variables('rdshHaDeploymentUri')]",
           "contentVersion": "1.0.0.0"
         },
-        "lbName": {
-            "value": "tenantMainLb"
-        },
-        "gwNatRuleName": {
-            "value": "[variables('lbGwRdpNatRule')]"
-        },
-        "gwBeAddressPool": {
-            "value": "[variables('lbLbAddressPoolName')]"
-        },
-        "tenantNetworkName": {
-            "value": "[variables('virtualNetworkName')]"
-        },
-        "subnetName": {
-            "value": "[variables('subnetName')]"
-        },
-        "numberOfGateways": {
-            "value": 2
-        },
-        "numberOfRdshs": {
-            "value": 2
-        },
-        "publicIpAddressName": {
-            "value": "[variables('publicIPAddressName')]"
-        },
-        "webUrl": {
-            "value": "[concat(parameters('tenantDnsPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
-        },
-        "domainName": {
-            "value": "[parameters('adDomainName')]"
-        },
-        "adminUsername": {
-            "value": "[parameters('adminUsername')]"
-        },
-        "adminPassword": {
-            "value": "[parameters('adminPassword')]"
-        },
-        "primaryDnsIp": {
-            "value": "10.0.0.4"
-        },
-        "secondaryDnsIp": {
-            "value": "10.0.0.5"
+        "parameters": {
+          "lbName": {
+              "value": "tenantMainLb"
+          },
+          "gwNatRuleName": {
+              "value": "[variables('lbGwRdpNatRule')]"
+          },
+          "gwBeAddressPool": {
+              "value": "[variables('lbLbAddressPoolName')]"
+          },
+          "tenantNetworkName": {
+              "value": "[variables('virtualNetworkName')]"
+          },
+          "subnetName": {
+              "value": "[variables('subnetName')]"
+          },
+          "numberOfGateways": {
+              "value": 2
+          },
+          "numberOfRdshs": {
+              "value": 2
+          },
+          "publicIpAddressName": {
+              "value": "[variables('publicIPAddressName')]"
+          },
+          "webUrl": {
+              "value": "[concat(parameters('tenantDnsPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
+          },
+          "domainName": {
+              "value": "[parameters('adDomainName')]"
+          },
+          "adminUsername": {
+              "value": "[parameters('adminUsername')]"
+          },
+          "adminPassword": {
+              "value": "[parameters('adminPassword')]"
+          },
+          "primaryDnsIp": {
+              "value": "10.0.0.4"
+          },
+          "secondaryDnsIp": {
+              "value": "10.0.0.5"
+          }
         }
       }
     }
