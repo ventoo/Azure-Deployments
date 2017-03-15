@@ -135,22 +135,37 @@
   },
   "resources": [
     {
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2017-03-30",
       "type": "Microsoft.Compute/availabilitySets",
       "name": "[parameters('gwAvailabilitySetName')]",
-      "location": "[resourceGroup().location]"
+      "location": "[resourceGroup().location]",
+      "sku": { "name": "Aligned" },
+      "properties": {
+        "platformFaultDomainCount": 3,
+        "platformUpdateDomainCount": 5
+      }
     },
     {
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2017-03-30",
       "type": "Microsoft.Compute/availabilitySets",
       "name": "[parameters('cbAvailabilitySetName')]",
-      "location": "[resourceGroup().location]"
+      "location": "[resourceGroup().location]",
+      "sku": { "name": "Aligned" },
+      "properties": {
+        "platformFaultDomainCount": 3,
+        "platformUpdateDomainCount": 5
+      }
     },
     {
-      "apiVersion": "2015-06-15",
+      "apiVersion": "2017-03-30",
       "type": "Microsoft.Compute/availabilitySets",
       "name": "[parameters('rdshAvailabilitySetName')]",
-      "location": "[resourceGroup().location]"
+      "location": "[resourceGroup().location]",
+      "sku": { "name": "Aligned" },
+      "properties": {
+        "platformFaultDomainCount": 3,
+        "platformUpdateDomainCount": 5
+      }
     },
     {
       "apiVersion": "2015-06-15",
@@ -444,7 +459,7 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "cb-vm/rdsdeployment",
+      "name": "cbVm/rdsdeployment",
       "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "dependsOn": [
