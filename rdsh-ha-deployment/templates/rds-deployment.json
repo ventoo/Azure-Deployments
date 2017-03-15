@@ -115,8 +115,8 @@
   },
   "variables": {
     "lbId": "[[resourceId('Microsoft.Network/loadBalancers', parameters('lbName'))]",
-    "gwNatRuleNameId": "[concat(variables('lbId'),'/inboundNatRules/',parameters('gwNatRuleName'))]",
-    "gwBeAddressPoolId": "[concat(variables('lbId'),'/backendAddressPools/',parameters('gwBeAddressPool'))]",
+    "gwNatRuleNameId": "[concat(variables('lbId'),'/inboundNatRules/', parameters('gwNatRuleName'))]",
+    "gwBeAddressPoolId": "[concat(variables('lbId'),'/backendAddressPools/', parameters('gwBeAddressPool'))]",
     "subnetId": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('tenantNetworkName')),'/subnets/', parameters('subnetName'))]",
 
     "gwVmNamePrefix": "gwVm",
@@ -470,7 +470,7 @@
             },
             "connectionBroker": "[concat(variables('cbHostNamePrefix'), '.', parameters('domainName'))]",
             "domainName": "[parameters('domainName')]",
-            "externalfqdn": "[reference(variables('publicIpAddressId')).dnsSettings.fqdn]",
+            "externalfqdn": "[variables('cbFQDN')]",
             "numberOfRdshInstances": "[parameters('numberOfRdshs')]",
             "sessionHostNamingPrefix": "rdsh-",
             "webAccessServer": "[concat(variables('cbHostNamePrefix'), '0', parameters('domainName'))]"
