@@ -266,8 +266,8 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2016-04-30-preview",
       "dependsOn": [
-          "[resourceId('Microsoft.Compute/availabilitySets', parameters('rdshAvailabilitySetName'))]",
-            "[concat('Microsoft.Network/networkInterfaces/', parameters('rdshNicName'))]"
+          "[resourceId('Microsoft.Compute/availabilitySets/', parameters('rdshAvailabilitySetName'))]",
+          "[resourceId('Microsoft.Network/networkInterfaces/', parameters('rdshNicName'))]"
       ],
       "copy": {
         "name": "rdshVmLoop",
@@ -347,8 +347,8 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2016-04-30-preview",
       "dependsOn": [          
-        "[resourceId('Microsoft.Compute/availabilitySets', parameters('cbAvailabilitySetName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', parameters('cbNicName'))]",
+        "[resourceId('Microsoft.Compute/availabilitySets/', parameters('cbAvailabilitySetName'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces/', parameters('cbNicName'))]",
         "rdshVmLoop"
       ],
       "properties": {
@@ -393,8 +393,8 @@
         "count": "[parameters('numberOfGateways')]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Compute/availabilitySets', parameters('gwAvailabilitySetName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', parameters('gwNicName'), copyindex())]"
+        "[resourceId('Microsoft.Compute/availabilitySets/', parameters('gwAvailabilitySetName'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces/', parameters('gwNicName'), copyindex())]"
       ],
       "properties": {
         "hardwareProfile": {
