@@ -114,7 +114,7 @@
     }
   },
   "variables": {
-    "lbId": "[[resourceId('Microsoft.Network/loadBalancers', parameters('lbName'))]",
+    "lbId": "[resourceId('Microsoft.Network/loadBalancers', parameters('lbName'))]",
     "gwNatRuleNameId": "[concat(variables('lbId'),'/inboundNatRules/', parameters('gwNatRuleName'))]",
     "gwBeAddressPoolId": "[concat(variables('lbId'),'/backendAddressPools/', parameters('gwBeAddressPool'))]",
     "subnetId": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('tenantNetworkName')),'/subnets/', parameters('subnetName'))]",
@@ -265,6 +265,10 @@
       "name": "[concat(variables('rdshVmNamePrefix'), copyIndex())]",
       "location": "[resourceGroup().location]",
       "apiVersion": "2016-04-30-preview",
+      "dependsOn": [
+          "[resourceId('Microsoft.Compute/availabilitySets', parameters('rdshAvailabilitySetName'))]",
+            "[concat('Microsoft.Network/networkInterfaces/', parameters('rdshNicName'))]"
+      ],
       "copy": {
         "name": "rdshVmLoop",
         "count": "[parameters('numberOfRdshs')]"
@@ -342,7 +346,8 @@
       "name": "[variables('cbVmNamePrefix')]",
       "location": "[resourceGroup().location]",
       "apiVersion": "2016-04-30-preview",
-      "dependsOn": [
+      "dependsOn": [          
+        "[resourceId('Microsoft.Compute/availabilitySets', parameters('cbAvailabilitySetName'))]",
         "[concat('Microsoft.Network/networkInterfaces/', parameters('cbNicName'))]",
         "rdshVmLoop"
       ],
