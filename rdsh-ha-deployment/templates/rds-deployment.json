@@ -1,0 +1,513 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "gwAvailabilitySetName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the availability set that the AD VM is created in"
+      },
+      "defaultValue": "gwAvailabiltySet"
+    },
+    "cbAvailabilitySetName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the availability set that the AD VM is created in"
+      },
+      "defaultValue": "cbAvailabiltySet"
+    },
+    "rdshAvailabilitySetName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the availability set that the AD VM is created in"
+      },
+      "defaultValue": "rdshAvailabiltySet"
+    },
+    "lbName": {
+        "type": "string"
+    },
+    "gwNatRuleName": {
+        "type": "string"
+    },
+    "gwBeAddressPool": {
+        "type": "string"
+    },
+    "gwNicName": {
+        "type": "string",
+        "defaultValue": "gwNic"
+    },
+    "cbNicName": {
+        "type": "string",
+        "defaultValue": "cbNic"
+    },
+    "rdshNicName": {
+        "type": "string",
+        "defaultValue": "rdshNic"
+    },
+    "tenantNetworkName": {
+        "type": "string"
+    },
+    "subnetName": {
+        "type": "string"
+    },
+    "numberOfGateways": {
+        "type": "int"
+    },
+    "numberOfRdshs": {
+        "type": "int"
+    },
+    "vmSizeGw": {
+        "type": "string",
+        "defaultValue": "Standard_DS1_v2"
+    },
+    "vmSizeCb": {
+        "type": "string",
+        "defaultValue": "Standard_DS1_v2"
+    },
+    "vmSizeRdsh": {
+        "type": "string",
+        "defaultValue": "Standard_DS11_v2"
+    },
+    "publicIpAddressName": {
+        "type": "string"
+    },
+    "webUrl": {
+        "type": "string"
+    },
+    "domainName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the AD domain. For example contoso.com"
+      },
+      "defaultValue": "contoso.com"
+    },
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the administrator of the new VM and the domain. Exclusion list: 'administrator'. For example johnadmin"
+      },
+      "defaultValue": "vmadmin"
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The password for the administrator account of the new VM and the domain"
+      },
+      "defaultValue": "[concat('Subscription#',subscription().subscriptionId)]"
+    },
+    "primaryDnsIp": {
+        "type": "string"
+    },
+    "secondaryDnsIp": {
+        "type": "string"
+    },
+    "imageSKU": {
+      "type": "string",
+      "allowedValues": [
+        "2012-R2-Datacenter",
+        "2016-Datacenter"
+      ],
+      "metadata": {
+        "description": "Windows server SKU"
+      },
+      "defaultValue": "2016-Datacenter"
+    }
+  },
+  "variables": {
+    "lbId": "[[resourceId('Microsoft.Network/loadBalancers', parameters('lbName'))]",
+    "gwNatRuleNameId": "[concat(variables('lbId'),'/inboundNatRules/',parameters('gwNatRuleName'))]",
+    "gwBeAddressPoolId": "[concat(variables('lbId'),'/backendAddressPools/',parameters('gwBeAddressPool'))]",
+    "subnetId": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('tenantNetworkName')),'/subnets/', parameters('subnetName'))]",
+
+    "gwVmNamePrefix": "gwVm",
+    "gwHostNamePrefix": "gw",
+    "cbVmNamePrefix": "cbVm",
+    "cbHostNamePrefix": "cb",
+    "cbFQDN": "[concat(variables('cbHostNamePrefix'), '.', parameters('domainName'))]",
+    "rdshVmNamePrefix": "rdshVm",
+    "rdshHostNamePrefix": "rdsh",
+
+    "publicIpAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpAddressName'))]",
+    "imagePublisher": "MicrosoftWindowsServer",
+    "imageOffer": "WindowsServer",
+    "assetLocation": "https://raw.githubusercontent.com/ventoo/Azure-Deployments/master/rdsh-ha-deployment",
+    "DomainNetbios": "[split(parameters('domainName'), '.')[0]]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "[parameters('gwAvailabilitySetName')]",
+      "location": "[resourceGroup().location]"
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "[parameters('cbAvailabilitySetName')]",
+      "location": "[resourceGroup().location]"
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "[parameters('rdshAvailabilitySetName')]",
+      "location": "[resourceGroup().location]"
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[parameters('cbNicName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('subnetId')]"
+              }
+            }
+          }
+        ],
+        "dnsSettings": {
+          "dnsServers": [
+            "[parameters('primaryDnsIp')]",
+            "[parameters('secondaryDnsIp')]"
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(parameters('gwNicName'), copyIndex())]",
+      "location": "[resourceGroup().location]",
+      "copy": {
+        "name": "gwNicLoop",
+        "count": "[parameters('numberOfGateways')]"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('subnetId')]"
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[variables('gwBeAddressPoolId')]"
+                }
+              ],
+              "loadBalancerInboundNatRules": [
+                {
+                  "id": "[variables('gwNatRuleNameId')]"
+                }
+              ]
+            }
+          }
+        ],
+        "dnsSettings": {
+          "dnsServers": [
+            "[parameters('primaryDnsIp')]",
+            "[parameters('secondaryDnsIp')]"
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(parameters('rdshNicName'), copyIndex())]",
+      "location": "[resourceGroup().location]",
+      "copy": {
+        "name": "rdshNicLoop",
+        "count": "[parameters('numberOfRdshs')]"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('subnetId')]"
+              }
+            }
+          }
+        ],
+        "dnsSettings": {
+          "dnsServers": [
+            "[parameters('primaryDnsIp')]",
+            "[parameters('secondaryDnsIp')]"
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[concat(variables('rdshVmNamePrefix'), copyIndex())]",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-04-30-preview",
+      "copy": {
+        "name": "rdshVmLoop",
+        "count": "[parameters('numberOfRdshs')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', parameters('rdshNicName'), copyIndex())]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSizeRdsh')]"
+        },
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('rdshAvailabilitySetName'))]"
+        },
+        "osProfile": {
+          "computerName": "[concat(variables('rdshHostNamePrefix'), copyIndex())]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[parameters('imageSKU')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('rdshNicName'), copyIndex()))]"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "type": "Microsoft.Compute/virtualMachines/extensions",
+          "name": "[concat(variables('rdshVmNamePrefix'), copyIndex(),'/sessionhost')]",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines', concat(variables('rdshVmNamePrefix'), copyIndex()))]"
+          ],
+          "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.11",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "ModulesUrl": "[concat(variables('assetLocation'),'/Configuration.zip')]",
+              "ConfigurationFunction": "Configuration.ps1\\SessionHost",
+              "Properties": {
+                "DomainName": "[parameters('domainName')]",
+                "AdminCreds": {
+                  "UserName": "[parameters('adminUsername')]",
+                  "Password": "PrivateSettingsRef:AdminPassword"
+                }
+              }
+            },
+            "protectedSettings": {
+              "Items": {
+                "AdminPassword": "[parameters('adminPassword')]"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[variables('cbVmNamePrefix')]",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-04-30-preview",
+      "dependsOn": [
+        "[concat('Network/networkInterfaces/', parameters('cbNicName'))]",
+        "rdshVmLoop"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSizeCb')]"
+        },
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('cbAvailabilitySetName'))]"
+        },
+        "osProfile": {
+          "computerName": "[concat(variables('cbHostNamePrefix'), '0')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[parameters('imageSKU')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('cbNicName'))]"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "[concat(variables('gwVmNamePrefix'),copyindex())]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-04-30-preview",
+      "copy": {
+        "name": "gwVmLoop",
+        "count": "[parameters('numberOfGateways')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/availabilitySets', parameters('gwAvailabilitySetName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', parameters('gwNicName'), copyindex())]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSizeGw')]"
+        },
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('gwAvailabilitySetName'))]"
+        },
+        "osProfile": {
+          "computerName": "[concat(variables('gwHostNamePrefix'), copyIndex())]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[parameters('imageSKU')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('gwNicName'), copyindex()))]"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "name": "[concat(variables('gwVmNamePrefix'), copyindex(), '/Gateway')]",
+          "type": "Microsoft.Compute/virtualMachines/extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2016-03-30",
+          "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines', concat(variables('gwVmNamePrefix'),copyindex()))]"
+          ],
+          "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.19",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "ModulesUrl": "[concat(variables('assetLocation'),'/Configuration.zip')]",
+              "ConfigurationFunction": "Configuration.ps1\\Gateway",
+              "properties": {
+                "DomainName": "[parameters('domainName')]",
+                "AdminCreds": {
+                  "UserName": "[parameters('adminUsername')]",
+                  "Password": "PrivateSettingsRef:AdminPassword"
+                }
+              }
+            },
+            "protectedSettings": {
+              "Items": {
+                "AdminPassword": "[parameters('adminPassword')]"
+              }
+            }
+
+          }
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "cb-vm/rdsdeployment",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/virtualMachines', variables('cbVmNamePrefix'))]",
+        "gwVmLoop",
+        "rdshVmLoop"
+      ],
+      "properties": {
+        "autoUpgradeMinorVersion": true,
+        "protectedSettings": {
+          "Items": {
+            "adminPassword": "[parameters('adminPassword')]"
+          }
+        },
+        "publisher": "Microsoft.Powershell",
+        "settings": {
+          "modulesUrl": "[concat(variables('assetLocation'),'/Configuration.zip')]",
+          "configurationFunction": "Configuration.ps1\\RDSDeployment",
+          "Properties": {
+            "adminCreds": {
+              "UserName": "[parameters('adminUsername')]",
+              "Password": "PrivateSettingsRef:adminPassword"
+            },
+            "connectionBroker": "[concat(variables('cbHostNamePrefix'), '.', parameters('domainName'))]",
+            "domainName": "[parameters('domainName')]",
+            "externalfqdn": "[reference(variables('publicIpAddressId')).dnsSettings.fqdn]",
+            "numberOfRdshInstances": "[parameters('numberOfRdshs')]",
+            "sessionHostNamingPrefix": "rdsh-",
+            "webAccessServer": "[concat(variables('cbHostNamePrefix'), '0', parameters('domainName'))]"
+          }
+        },
+        "type": "DSC",
+        "typeHandlerVersion": "2.11"
+      }
+    },
+    {
+        "name": "[concat(variables('gwVmNamePrefix'),copyindex(),'/WebAndGwFarmAdd_PostConfig1.1')]",
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "location": "[resourceGroup().location]",
+        "apiVersion": "2016-03-30",
+        "copy": {
+            "name": "gwConfigLoop",
+            "count": "[parameters('numberOfGateways')]"
+        },
+        "dependsOn": [
+            "gwVmLoop"
+        ],
+        "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.8",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+            "fileUris": [ "[concat(variables('assetLocation'), 'Scripts/WebAndGwFarmAdd_PostConfig1.1.ps1')]" ]
+            
+        },
+        "protectedSettings": {
+            
+            "Items": { "AdminPassword": "[parameters('adminPassword')]" },
+            "commandToExecute": "[Concat('powershell.exe -ExecutionPolicy Unrestricted -File', ' ', 'WebAndGwFarmAdd_PostConfig1.1.ps1',' ','-username \"',parameters('adminUsername'),'\" ', '-password \"',parameters('adminPassword'),'\" ','-BrokerServer \"',variables('cbFQDN'),'\" ','-WebURL \"',parameters('WebURL'),'\" ','-Domainname \"',parameters('domainName'),'\" ','-DomainNetbios \"',variables('DomainNetbios'),'\" ','-numberofwebServers ',parameters('numberOfGateways'))]"
+        }
+
+        }
+    }
+  ]
+}
