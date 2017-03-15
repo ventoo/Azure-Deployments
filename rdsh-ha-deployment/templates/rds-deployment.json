@@ -267,7 +267,7 @@
       "apiVersion": "2016-04-30-preview",
       "dependsOn": [
           "[resourceId('Microsoft.Compute/availabilitySets/', parameters('rdshAvailabilitySetName'))]",
-          "[resourceId('Microsoft.Network/networkInterfaces/', parameters('rdshNicName'))]"
+          "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('rdshNicName'), copyIndex()))]"
       ],
       "copy": {
         "name": "rdshVmLoop",
@@ -394,7 +394,7 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.Compute/availabilitySets/', parameters('gwAvailabilitySetName'))]",
-        "[resourceId('Microsoft.Network/networkInterfaces/', parameters('gwNicName'), copyindex())]"
+        "[resourceId('Microsoft.Network/networkInterfaces/', concat(parameters('gwNicName'), copyindex()))]"
       ],
       "properties": {
         "hardwareProfile": {
