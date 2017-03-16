@@ -315,7 +315,7 @@
             "typeHandlerVersion": "2.11",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              "ModulesUrl": "[concat(variables('assetLocation'),'/ConfigureRDSH.ps1.zip')]",
+              "ModulesUrl": "[concat(variables('assetLocation'),'/DSC/ConfigureRDSH.ps1.zip')]",
               "ConfigurationFunction": "ConfigureRDSH.ps1\\SessionHost",
               "Properties": {
                 "DomainName": "[parameters('domainName')]",
@@ -474,7 +474,7 @@
         },
         "publisher": "Microsoft.Powershell",
         "settings": {
-          "modulesUrl": "[concat(variables('assetLocation'),'/ConfigureRDSH.ps1.zip')]",
+          "modulesUrl": "[concat(variables('assetLocation'),'/DSC/ConfigureRDSH.ps1.zip')]",
           "configurationFunction": "ConfigureRDSH.ps1\\RDSDeployment",
           "Properties": {
             "adminCreds": {
