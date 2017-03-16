@@ -21,7 +21,7 @@
       "metadata": {
         "description": "The name of the availability set that the AD VM is created in"
       },
-      "defaultValue": "rdshAvailabiltiySet"
+      "defaultValue": "rdshAvailabilitySet"
     },
     "lbName": {
         "type": "string"
@@ -269,9 +269,6 @@
         "name": "rdshVmLoop",
         "count": "[parameters('numberOfRdshs')]"
       },
-      "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', parameters('rdshNicName'), copyIndex())]"
-      ],
       "properties": {
         "hardwareProfile": {
           "vmSize": "[parameters('vmSizeRdsh')]"
