@@ -483,10 +483,10 @@
             },
             "connectionBroker": "[concat(variables('cbHostNamePrefix'), '.', parameters('domainName'))]",
             "domainName": "[parameters('domainName')]",
-            "externalfqdn": "[variables('cbFQDN')]",
+            "externalfqdn": "[parameters('webUrl')]",
             "numberOfRdshInstances": "[parameters('numberOfRdshs')]",
-            "sessionHostNamingPrefix": "rdsh-",
-            "webAccessServer": "[concat(variables('cbHostNamePrefix'), '0', parameters('domainName'))]"
+            "sessionHostNamingPrefix": "[variables('rdshHostNamePrefix')]",
+            "webAccessServer": "[concat(variables('gwHostNamePrefix'), '0', parameters('domainName'))]"
           }
         },
         "type": "DSC",
