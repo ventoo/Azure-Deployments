@@ -14,13 +14,7 @@
         "Description": "The name of the NIC to Create or Update"
       } 
     },
-    "lbBackendPoolName": {
-        "type": "string"
-    },
     "natBackendPoolName": {
-        "type": "string"
-    },
-    "gwRdpNatRuleName": {
         "type": "string"
     },
     "pdcRdpNatRuleName": {
@@ -29,24 +23,19 @@
     "bdcRdpNatRuleName": {
         "type": "string"
     },
-    "gwFrontendPort": {
+    "pdcFrontendPort": {
         "type": "string",
         "defaultValue": "3389"
     },
-    "pdcFrontendPort": {
-        "type": "string",
-        "defaultValue": "3390"
-    },
     "bdcFrontendPort": {
         "type": "string",
-        "defaultValue": "3391"
+        "defaultValue": "3390"
     }
   },
   "variables": {
     "frontEndAddressPool": "feAddressPool",
     "lbId": "[resourceId('Microsoft.Network/loadBalancers',parameters('lbName'))]",
-    "lbIpConfigId": "[concat(variables('lbId'),'/frontendIPConfigurations/',variables('frontEndAddressPool'))]",
-    "lbBackendPoolId": "[concat(variables('lbId'),'/backendAddressPools/',parameters('lbBackendPoolName'))]"
+    "lbIpConfigId": "[concat(variables('lbId'),'/frontendIPConfigurations/',variables('frontEndAddressPool'))]"
   },
   "resources": [
     {
@@ -68,81 +57,13 @@
 
         "backendAddressPools": [
           {
-            "name": "[parameters('lbBackendPoolName')]"
-          },
-          {
             "name": "[parameters('natBackendPoolName')]"
           }
         ],
 
-        "loadBalancingRules": [
-          {
-            "name": "RDWebRule",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id": "[variables('lbIpConfigId')]"
-              },
-              "backendAddressPool": {
-                "id": "[variables('lbBackendPoolId')]"
-              },
-              "protocol": "Tcp",
-              "frontendPort": 443,
-              "backendPort": 443,
-              "enableFloatingIP": false,
-              "idleTimeoutInMinutes": 5,
-              "loadDistribution": "SourceIPProtocol",
-              "probe": {
-                "id": "[concat(variables('lbId'),'/probes/tcpProbe')]"
-              }
-            }
-          },
-          {
-            "name": "GWRule",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id": "[variables('lbIpConfigId')]"
-              },
-              "backendAddressPool": {
-                "id": "[variables('lbBackendPoolId')]"
-              },
-              "protocol": "Udp",
-              "frontendPort": 3391,
-              "backendPort": 3391,
-              "enableFloatingIP": false,
-              "idleTimeoutInMinutes": 5,
-              "loadDistribution": "SourceIPProtocol",
-              "probe": {
-                "id": "[concat(variables('lbId'),'/probes/tcpProbe')]"
-              }
-            }
-          }
-        ],
-
-        "probes": [
-            {
-                "name": "tcpProbe",
-                "properties": {
-                    "protocol": "Tcp",
-                    "port": 443,
-                    "intervalInSeconds": 5,
-                    "numberOfProbes": 2
-                }
-            }
-        ],
+        "loadBalancingRules": [ ],
 
         "inboundNatRules": [
-        {
-            "name": "[parameters('gwRdpNatRuleName')]",
-            "properties": {
-                "frontendIPConfiguration": {
-                    "id": "[variables('lbIpConfigId')]"
-                },
-                "protocol": "tcp",
-                "frontendPort": "[parameters('gwFrontendPort')]",
-                "backendPort": 3389,
-                "enableFloatingIP": false
-            }
-          },
           {
             "name": "[parameters('pdcRdpNatRuleName')]",
             "properties": {

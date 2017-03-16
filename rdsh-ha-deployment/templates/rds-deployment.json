@@ -7,21 +7,21 @@
       "metadata": {
         "description": "The name of the availability set that the AD VM is created in"
       },
-      "defaultValue": "gwAvailabiltySet"
+      "defaultValue": "gwAvailabilitySet"
     },
     "cbAvailabilitySetName": {
       "type": "string",
       "metadata": {
         "description": "The name of the availability set that the AD VM is created in"
       },
-      "defaultValue": "cbAvailabiltySet"
+      "defaultValue": "cbAvailabiltiySet"
     },
     "rdshAvailabilitySetName": {
       "type": "string",
       "metadata": {
         "description": "The name of the availability set that the AD VM is created in"
       },
-      "defaultValue": "rdshAvailabiltySet"
+      "defaultValue": "rdshAvailabiltiySet"
     },
     "lbName": {
         "type": "string"

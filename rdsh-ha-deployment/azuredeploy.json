@@ -7,7 +7,7 @@
       "metadata": {
         "description": "Unique tenant dns prefix"
       },
-      "defaultValue": "[toLower(concat('ventoo-cust-', uniqueString(resourceGroup().id)))]"
+      "defaultValue": "[toLower(uniqueString(resourceGroup().id))]"
     },
     "adDomainName": {
       "type": "string",
@@ -64,8 +64,10 @@
   },
   "variables": {
     "assetLocation": "https://raw.githubusercontent.com/ventoo/Azure-Deployments/master/rdsh-ha-deployment",
-    "publicIpAddressName": "tenantPip",
-    "publicIpAddressType": "Dynamic",
+    "gwIpAddressName": "gwPip",
+    "gwIpAddressType": "Dynamic",
+    "adminIpAddressName": "adminPip",
+    "adminIpAddressType": "Dynamic",
 
     "vnetTemplateUri": "[concat(variables('assetLocation'),'/templates/vnet.json')]",
     "virtualNetworkName": "tenantNetwork",
@@ -74,11 +76,12 @@
     "subnetRange": "10.0.0.0/24",
 
     "lbTemplateUri": "[concat(variables('assetLocation'),'/templates/loadBalancer.json')]",
-    "lbLbAddressPoolName": "lbBackendAddressPool",
-    "lbNatAddressPoolName": "natBackendAddressPool",
-    "lbGwRdpNatRule": "gwRdpNatRule",
+    "lbNatAddressPoolName": "BackendAddressPool",
     "lbPdcRdpNatRule": "pdcRdpNatRule",
     "lbBdcRdpNatRule": "bdcRdpNatRule",
+
+    "lbLbAddressPoolName": "BackendAddressPool",
+    "lbGwRdpNatRule": "gwRdpNatRule",
 
     "adHaDeploymentUri": "[concat(variables('assetLocation'),'/templates/ad-ha-deployment.json')]",
     
@@ -86,14 +89,26 @@
   },
   "resources": [
     {
-      "name": "[variables('publicIPAddressName')]",
+      "name": "[variables('adminIPAddressName')]",
       "type": "Microsoft.Network/publicIPAddresses",
       "apiVersion": "2016-10-01",
       "location": "[resourceGroup().location]",
       "properties": {
-        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "publicIPAllocationMethod": "[variables('adminIPAddressType')]",
         "dnsSettings": {
-          "domainNameLabel": "[parameters('tenantDnsPrefix')]"
+          "domainNameLabel": "[concat('vde-admin-',parameters('tenantDnsPrefix'))]"
+        }
+      }
+    },
+    {
+      "name": "[variables('gwIPAddressName')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2016-10-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('gwIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[concat('vde-gw-',parameters('tenantDnsPrefix'))]"
         }
       }
     },
@@ -124,11 +139,11 @@
       }
     },
     {
-      "name": "LoadBalancer",
+      "name": "AdminLoadBalancer",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2016-09-01",
       "dependsOn": [
-        "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+        "[resourceId('Microsoft.Network/publicIPAddresses',variables('adminIPAddressName'))]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -138,25 +153,48 @@
         },
         "parameters": {
           "lbName": {
-            "value": "tenantMainLb"
+            "value": "lbAdmin"
           },
           "publicIpAddressName": {
-            "value": "[variables('publicIPAddressName')]"
-          },
-          "lbBackendPoolName": {
-            "value": "[variables('lbLbAddressPoolName')]"
+            "value": "[variables('adminIPAddressName')]"
           },
           "natBackendPoolName": {
             "value": "[variables('lbNatAddressPoolName')]"
-          },
-          "gwRdpNatRuleName": {
-            "value": "[variables('lbGwRdpNatRule')]"
           },
           "pdcRdpNatRuleName": {
             "value": "[variables('lbPdcRdpNatRule')]"
           },
           "bdcRdpNatRuleName": {
             "value": "[variables('lbBdcRdpNatRule')]"
+          }
+        }
+      }
+    },
+    {
+      "name": "GwLoadBalancer",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-09-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses',variables('gwIPAddressName'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('lbTemplateUri')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "lbName": {
+            "value": "lbGateway"
+          },
+          "publicIpAddressName": {
+            "value": "[variables('gwIPAddressName')]"
+          },
+          "lbBackendPoolName": {
+            "value": "[variables('lbLbAddressPoolName')]"
+          },
+          "gwRdpNatRuleName": {
+            "value": "[variables('lbGwRdpNatRule')]"
           }
         }
       }
@@ -204,7 +242,7 @@
               "value": "[variables('lbNatAddressPoolName')]"
           },
           "lbName": {
-              "value": "tenantMainLb"
+              "value": "lbAdmin"
           },
           "adminUsername": {
             "value": "[parameters('adminUsername')]"
@@ -236,7 +274,7 @@
         },
         "parameters": {
           "lbName": {
-              "value": "tenantMainLb"
+              "value": "lbGateway"
           },
           "gwNatRuleName": {
               "value": "[variables('lbGwRdpNatRule')]"
@@ -257,10 +295,10 @@
               "value": 2
           },
           "publicIpAddressName": {
-              "value": "[variables('publicIPAddressName')]"
+              "value": "[variables('gwIPAddressName')]"
           },
           "webUrl": {
-              "value": "[concat(parameters('tenantDnsPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
+              "value": "[concat('vde-gw-', parameters('tenantDnsPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
           },
           "domainName": {
               "value": "[parameters('adDomainName')]"
