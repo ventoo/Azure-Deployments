@@ -481,7 +481,7 @@
               "UserName": "[parameters('adminUsername')]",
               "Password": "PrivateSettingsRef:adminPassword"
             },
-            "connectionBroker": "[concat(variables('cbHostNamePrefix'), '.', parameters('domainName'))]",
+            "connectionBroker": "[concat(variables('cbHostNamePrefix'), '0', '.', parameters('domainName'))]",
             "domainName": "[parameters('domainName')]",
             "externalfqdn": "[parameters('webUrl')]",
             "numberOfRdshInstances": "[parameters('numberOfRdshs')]",
@@ -517,7 +517,7 @@
         "protectedSettings": {
             
             "Items": { "AdminPassword": "[parameters('adminPassword')]" },
-            "commandToExecute": "[Concat('powershell.exe -ExecutionPolicy Unrestricted -File', ' ', 'WebAndGwFarmAdd_PostConfig1.1.ps1',' ','-username \"',parameters('adminUsername'),'\" ', '-password \"',parameters('adminPassword'),'\" ','-BrokerServer \"',variables('cbFQDN'),'\" ','-WebURL \"',parameters('WebURL'),'\" ','-Domainname \"',parameters('domainName'),'\" ','-DomainNetbios \"',variables('DomainNetbios'),'\" ','-numberofwebServers ',parameters('numberOfGateways'))]"
+            "commandToExecute": "[Concat('powershell.exe -ExecutionPolicy Unrestricted -File', ' ', 'WebAndGwFarmAdd_PostConfig1.1.ps1',' ','-username \"',parameters('adminUsername'),'\" ', '-password \"',parameters('adminPassword'),'\" ','-BrokerServer \"',concat(variables('cbHostNamePrefix'), '0', '.', parameters('domainName')),'\" ','-WebURL \"',parameters('WebURL'),'\" ','-Domainname \"',parameters('domainName'),'\" ','-DomainNetbios \"',variables('DomainNetbios'),'\" ','-numberofwebServers ',parameters('numberOfGateways'))]"
         }
 
         }
