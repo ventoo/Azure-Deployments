@@ -457,7 +457,7 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "cbVm/rdsdeployment",
+      "name": "[concat(variables('cbVmNamePrefix'), '/rdsdeployment')]",
       "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "dependsOn": [
@@ -511,7 +511,7 @@
         "typeHandlerVersion": "1.8",
         "autoUpgradeMinorVersion": true,
         "settings": {
-            "fileUris": [ "[concat(variables('assetLocation'), 'Scripts/WebAndGwFarmAdd_PostConfig1.1.ps1')]" ]
+            "fileUris": [ "[concat(variables('assetLocation'), '/Scripts/WebAndGwFarmAdd_PostConfig1.1.ps1')]" ]
             
         },
         "protectedSettings": {
