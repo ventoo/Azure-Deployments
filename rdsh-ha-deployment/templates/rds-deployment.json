@@ -119,12 +119,12 @@
     "gwBeAddressPoolId": "[concat(variables('lbId'),'/backendAddressPools/', parameters('gwBeAddressPool'))]",
     "subnetId": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('tenantNetworkName')),'/subnets/', parameters('subnetName'))]",
 
-    "gwVmNamePrefix": "gwVm",
+    "gwVmNamePrefix": "gw",
     "gwHostNamePrefix": "gw",
-    "cbVmNamePrefix": "cbVm",
+    "cbVmNamePrefix": "cb",
     "cbHostNamePrefix": "cb",
     "cbFQDN": "[concat(variables('cbHostNamePrefix'), '.', parameters('domainName'))]",
-    "rdshVmNamePrefix": "rdshVm",
+    "rdshVmNamePrefix": "rdsh",
     "rdshHostNamePrefix": "rdsh",
 
     "publicIpAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpAddressName'))]",
@@ -315,8 +315,8 @@
             "typeHandlerVersion": "2.11",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              "ModulesUrl": "[concat(variables('assetLocation'),'/Configuration.zip')]",
-              "ConfigurationFunction": "Configuration.ps1\\SessionHost",
+              "ModulesUrl": "[concat(variables('assetLocation'),'/ConfigureRDSH.ps1.zip')]",
+              "ConfigurationFunction": "ConfigureRDSH.ps1\\SessionHost",
               "Properties": {
                 "DomainName": "[parameters('domainName')]",
                 "AdminCreds": {
@@ -435,7 +435,7 @@
             "typeHandlerVersion": "2.19",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              "ModulesUrl": "[concat(variables('assetLocation'),'/DSC/ConfigureRDSH.zip')]",
+              "ModulesUrl": "[concat(variables('assetLocation'),'/DSC/ConfigureRDSH.ps1.zip')]",
               "ConfigurationFunction": "ConfigureRDSH.ps1\\Gateway",
               "properties": {
                 "DomainName": "[parameters('domainName')]",
@@ -474,7 +474,7 @@
         },
         "publisher": "Microsoft.Powershell",
         "settings": {
-          "modulesUrl": "[concat(variables('assetLocation'),'/ConfigureRDSH.zip')]",
+          "modulesUrl": "[concat(variables('assetLocation'),'/ConfigureRDSH.ps1.zip')]",
           "configurationFunction": "ConfigureRDSH.ps1\\RDSDeployment",
           "Properties": {
             "adminCreds": {
