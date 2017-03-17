@@ -486,7 +486,7 @@
             "externalfqdn": "[parameters('webUrl')]",
             "numberOfRdshInstances": "[parameters('numberOfRdshs')]",
             "sessionHostNamingPrefix": "[variables('rdshHostNamePrefix')]",
-            "webAccessServer": "[concat(variables('gwHostNamePrefix'), '0', parameters('domainName'))]"
+            "webAccessServer": "[concat(variables('gwHostNamePrefix'), '0', '.',parameters('domainName'))]"
           }
         },
         "type": "DSC",
