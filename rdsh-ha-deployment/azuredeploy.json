@@ -13,8 +13,7 @@
       "type": "string",
       "metadata": {
         "description": "The name of the AD domain."
-      },
-      "defaultValue": "corp.onventoo.com"
+      }
     },
     "adminUsername": {
       "type": "string",
@@ -27,8 +26,7 @@
       "type": "securestring",
       "metadata": {
         "description": "The password for the administrator account of the new VM and the domain"
-      },
-      "defaultValue": "MyAccPa$$001"
+      }
     },
     "numberOfGatewayInstances": {
       "type": "int",
