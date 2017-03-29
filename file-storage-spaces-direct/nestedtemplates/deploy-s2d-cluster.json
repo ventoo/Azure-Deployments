@@ -114,11 +114,15 @@
     },
     "resources": [
         {
-            "type": "Microsoft.Compute/availabilitySets",
             "name": "[variables('vmAvailabilitySetName')]",
-            "apiVersion": "2015-06-15",
+            "apiVersion": "2017-03-30",
+            "type": "Microsoft.Compute/availabilitySets",
             "location": "[resourceGroup().location]",
-            "properties": {}
+            "sku": { "name": "Aligned" },
+            "properties": {
+                "platformFaultDomainCount": 3,
+                "platformUpdateDomainCount": 5
+            }
         },
         {
             "type": "Microsoft.Storage/storageAccounts",
@@ -131,7 +135,7 @@
             "kind": "Storage"
         },
         {
-            "name": "[concat(parameters('vmNamePrefix'), copyindex(), 'Nic')]",
+            "name": "[concat(parameters('vmNamePrefix'), 'Nic', copyindex())]",
             "type": "Microsoft.Network/networkInterfaces",
             "location": "[resourceGroup().location]",
             "apiVersion": "2015-06-15",
@@ -173,6 +177,9 @@
                 "parameters": {
                     "vmName": {
                         "value": "[concat(parameters('vmNamePrefix'), copyindex())]"
+                    },
+                    "nicName": {
+                        "value": "[concat(parameters('vmNamePrefix'), 'Nic', copyindex())]"
                     },
                     "vmAvailabilitySetName": {
                         "value": "[variables('vmAvailabilitySetName')]"
