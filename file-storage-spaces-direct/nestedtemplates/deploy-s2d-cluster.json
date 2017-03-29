@@ -162,7 +162,6 @@
             },
             "name": "[concat(parameters('vmNamePrefix'),copyindex(),'-newVM')]",
             "dependsOn": [
-                "storageAccountLoop",
                 "nicLoop",
                 "[resourceId('Microsoft.Compute/availabilitySets', variables('vmAvailabilitySetName'))]"
             ],
