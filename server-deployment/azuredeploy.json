@@ -109,7 +109,7 @@
                             "name": "[concat(parameters('vmName'),'-data')]",
                             "diskSizeGB": "[parameters('vmDiskSize')]",
                             "lun": 0,
-                            "createOption": "Attach"
+                            "createOption": "Empty"
                             }
                     ]
                 },
@@ -119,42 +119,42 @@
                             "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
                         }
                     ]
-                },
-                "resources": [
-                        {
-                            "name": "[concat(parameters('vmName'),'/ADDomainJoin')]",
-                            "type": "Microsoft.Compute/virtualMachines/extensions",
-                            "apiVersion": "2016-03-30",
-                            "location": "[resourceGroup().location]",
-                            "dependsOn": [
-                                "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
-                            ],
-                            "properties": {
-                                "publisher": "Microsoft.Powershell",
-                                "type": "DSC",
-                                "typeHandlerVersion": "2.21",
-                                "autoUpgradeMinorVersion": true,
-                                "settings": {
-                                    "ModulesUrl": "[variables('domainJoinModulesURL')]",
-                                    "ConfigurationFunction": "[variables('domainJoinConfigurationFunction')]",
-                                    "Properties": {
-                                        "DomainName": "[parameters('domainName')]",
-                                        "AdminCreds": {
-                                        "UserName": "[parameters('adminUserName')]",
-                                        "Password": "PrivateSettingsRef:AdminPassword"
-                                        }
+                }
+            },
+            "resources": [
+                    {
+                        "name": "[concat(parameters('vmName'),'/ADDomainJoin')]",
+                        "type": "Microsoft.Compute/virtualMachines/extensions",
+                        "apiVersion": "2016-03-30",
+                        "location": "[resourceGroup().location]",
+                        "dependsOn": [
+                            "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
+                        ],
+                        "properties": {
+                            "publisher": "Microsoft.Powershell",
+                            "type": "DSC",
+                            "typeHandlerVersion": "2.21",
+                            "autoUpgradeMinorVersion": true,
+                            "settings": {
+                                "ModulesUrl": "[variables('domainJoinModulesURL')]",
+                                "ConfigurationFunction": "[variables('domainJoinConfigurationFunction')]",
+                                "Properties": {
+                                    "DomainName": "[parameters('domainName')]",
+                                    "AdminCreds": {
+                                    "UserName": "[parameters('adminUserName')]",
+                                    "Password": "PrivateSettingsRef:AdminPassword"
                                     }
-                                },
-                                "protectedSettings": {
-                                    "Items": {
-                                        "AdminPassword": "[parameters('adminPassword')]"
-                                    }
+                                }
+                            },
+                            "protectedSettings": {
+                                "Items": {
+                                    "AdminPassword": "[parameters('adminPassword')]"
                                 }
                             }
                         }
-                    ]
+                    }
+                ]
             }
-        }
     ],
     "outputs": {
         "vmName": {
