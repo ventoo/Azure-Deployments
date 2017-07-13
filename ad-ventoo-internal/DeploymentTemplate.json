@@ -7,7 +7,7 @@
       "metadata": {
         "description": "The location of resources, such as templates and DSC modules, that the template depends on"
       },
-      "defaultValue": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/active-directory-new-domain-ha-2-dc"
+      "defaultValue": "https://github.com/ventoo/Azure-Deployments/tree/master/ad-ventoo-internal"
     },
     "_artifactsLocationSasToken": {
       "type": "securestring",
