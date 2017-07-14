@@ -53,11 +53,11 @@
     "nicTemplateUri": "[concat(variables('_artifactsLocation'),'/nestedtemplates/nic.json', variables('_artifactsLocationSasToken'))]",
     "vnetwithDNSTemplateUri": "[concat(variables('_artifactsLocation'),'/nestedtemplates/vnet-with-dns-server.json', variables('_artifactsLocationSasToken'))]",
     "configureADBDCTemplateUri": "[concat(variables('_artifactsLocation'),'/nestedtemplates/configureADBDC.json', variables('_artifactsLocationSasToken'))]",
-    "adPDCModulesURL": "[concat(variables('_artifactsLocation'),'/DSC/CreateADPDC.zip', variables('_artifactsLocationSasToken'))]",
+    "adPDCModulesURL": "[concat(variables('_artifactsLocation'),'/DSC/CreateADPDC.ps1.zip', variables('_artifactsLocationSasToken'))]",
     "adPDCConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC",
-    "adBDCPreparationModulesURL": "[concat(variables('_artifactsLocation'),'/DSC/PrepareADBDC.zip', variables('_artifactsLocationSasToken'))]",
+    "adBDCPreparationModulesURL": "[concat(variables('_artifactsLocation'),'/DSC/PrepareADBDC.ps1.zip', variables('_artifactsLocationSasToken'))]",
     "adBDCPreparationFunction": "PrepareADBDC.ps1\\PrepareADBDC",
-    "adBDCConfigurationModulesURL": "[concat(variables('_artifactsLocation'),'/DSC/ConfigureADBDC.zip', variables('_artifactsLocationSasToken'))]",
+    "adBDCConfigurationModulesURL": "[concat(variables('_artifactsLocation'),'/DSC/ConfigureADBDC.ps1.zip', variables('_artifactsLocationSasToken'))]",
     "adBDCConfigurationFunction": "ConfigureADBDC.ps1\\ConfigureADBDC"
   },
   "resources": [
