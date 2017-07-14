@@ -2,26 +2,11 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "_artifactsLocation": {
-      "type": "string",
-      "metadata": {
-        "description": "The location of resources, such as templates and DSC modules, that the template depends on"
-      },
-      "defaultValue": "https://github.com/ventoo/Azure-Deployments/tree/master/ad-ventoo-internal"
-    },
-    "_artifactsLocationSasToken": {
-      "type": "securestring",
-      "metadata": {
-        "description": "Auto-generated token to access _artifactsLocation"
-      },
-      "defaultValue": ""
-    },
     "adminUsername": {
       "type": "string",
       "metadata": {
         "description": "Administrator username"
-      },
-      "defaultValue": ""
+      }
     },
     "adminPassword": {
       "type": "securestring",
@@ -31,6 +16,8 @@
     }
   },
   "variables": {
+    "_artifactsLocation": "https://raw.githubusercontent.com/ventoo/Azure-Deployments/master/ad-ventoo-internal",
+    "_artifactsLocationSasToken":  "",
     "domainName": "corp.ventoo.ch",
     "pdcRDPPort": "3389",
     "bdcRDPPort": "13389",
@@ -47,8 +34,8 @@
     "adLBBE": "LBBE",
     "adPDCRDPNAT": "adPDCRDP",
     "adBDCRDPNAT": "adBDCRDP",
-    "existingVirtualNetworkName": "VentooVNET",
-    "existingVirtualNetworkResourceGroup":  "Network",
+    "existingVirtualNetworkName": "ad-test-vnet",
+    "existingVirtualNetworkResourceGroup": "ad-test",
     "vnetID": "[resourceId(variables('existingVirtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks', variables('existingVirtualNetworkName'))]",
     "adSubnetName": "adSubnet",
     "adSubnet": "10.0.0.0/24",
@@ -63,17 +50,26 @@
     "adPDCRDPNATRuleID": "[concat(variables('adlbID'),'/inboundNatRules/',variables('adPDCRDPNAT'))]",
     "adBDCRDPNATRuleID": "[concat(variables('adlbID'),'/inboundNatRules/',variables('adBDCRDPNAT'))]",
     "adBEAddressPoolID": "[concat(variables('adlbID'),'/backendAddressPools/',variables('adLBBE'))]",
-    "nicTemplateUri": "[concat(parameters('_artifactsLocation'),'/nestedtemplates/nic.json', parameters('_artifactsLocationSasToken'))]",
-    "vnetwithDNSTemplateUri": "[concat(parameters('_artifactsLocation'),'/nestedtemplates/vnet-with-dns-server.json', parameters('_artifactsLocationSasToken'))]",
-    "configureADBDCTemplateUri": "[concat(parameters('_artifactsLocation'),'/nestedtemplates/configureADBDC.json', parameters('_artifactsLocationSasToken'))]",
-    "adPDCModulesURL": "[concat(parameters('_artifactsLocation'),'/DSC/CreateADPDC.zip', parameters('_artifactsLocationSasToken'))]",
+    "nicTemplateUri": "[concat(variables('_artifactsLocation'),'/nestedtemplates/nic.json', variables('_artifactsLocationSasToken'))]",
+    "vnetwithDNSTemplateUri": "[concat(variables('_artifactsLocation'),'/nestedtemplates/vnet-with-dns-server.json', variables('_artifactsLocationSasToken'))]",
+    "configureADBDCTemplateUri": "[concat(variables('_artifactsLocation'),'/nestedtemplates/configureADBDC.json', variables('_artifactsLocationSasToken'))]",
+    "adPDCModulesURL": "[concat(variables('_artifactsLocation'),'/DSC/CreateADPDC.zip', variables('_artifactsLocationSasToken'))]",
     "adPDCConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC",
-    "adBDCPreparationModulesURL": "[concat(parameters('_artifactsLocation'),'/DSC/PrepareADBDC.zip', parameters('_artifactsLocationSasToken'))]",
+    "adBDCPreparationModulesURL": "[concat(variables('_artifactsLocation'),'/DSC/PrepareADBDC.zip', variables('_artifactsLocationSasToken'))]",
     "adBDCPreparationFunction": "PrepareADBDC.ps1\\PrepareADBDC",
-    "adBDCConfigurationModulesURL": "[concat(parameters('_artifactsLocation'),'/DSC/ConfigureADBDC.zip', parameters('_artifactsLocationSasToken'))]",
+    "adBDCConfigurationModulesURL": "[concat(variables('_artifactsLocation'),'/DSC/ConfigureADBDC.zip', variables('_artifactsLocationSasToken'))]",
     "adBDCConfigurationFunction": "ConfigureADBDC.ps1\\ConfigureADBDC"
   },
   "resources": [
+    {
+      "apiVersion": "2016-09-01",
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "name": "[concat(variables('existingVirtualNetworkName'), '/', variables('adSubnetName'))]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "addressPrefix": "[variables('adSubnet')]"
+      }
+    },
     {
       "name": "[variables('publicIPAddressName')]",
       "type": "Microsoft.Network/publicIPAddresses",
@@ -149,10 +145,6 @@
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2016-10-01",
       "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "Microsoft.Resources/deployments/VNet",
-        "[variables('adLBName')]"
-      ],
       "properties": {
         "ipConfigurations": [
           {
@@ -183,10 +175,6 @@
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2016-10-01",
       "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "Microsoft.Resources/deployments/VNet",
-        "[concat('Microsoft.Network/loadBalancers/',variables('adLBName'))]"
-      ],
       "properties": {
         "ipConfigurations": [
           {
@@ -307,9 +295,6 @@
         "parameters": {
           "virtualNetworkName": {
             "value": "[variables('existingVirtualNetworkName')]"
-          },
-          "virtualNetworkAddressRange": {
-            "value": "[concat('Microsoft.Network/virtualNetworks/', variables('existingVirtualNetworkName'), '/addressSpace')]"
           },
           "subnetName": {
             "value": "[variables('adSubnetName')]"
@@ -498,9 +483,6 @@
         "parameters": {
           "virtualNetworkName": {
             "value": "[variables('existingVirtualNetworkName')]"
-          },
-          "virtualNetworkAddressRange": {
-            "value": "[concat('Microsoft.Network/virtualNetworks/', variables('existingVirtualNetworkName'), '/addressSpace')]"
           },
           "subnetName": {
             "value": "[variables('adSubnetName')]"
