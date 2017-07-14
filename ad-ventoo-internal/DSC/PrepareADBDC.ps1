@@ -3,10 +3,7 @@ configuration PrepareADBDC
    param
     (
         [Parameter(Mandatory)]
-        [String]$DNSServer,
-
-        [Int]$RetryCount=20,
-        [Int]$RetryIntervalSec=30
+        [String]$DNSServer
     )
 
     Import-DscResource -ModuleName  xStorage, xNetworking
@@ -18,20 +15,6 @@ configuration PrepareADBDC
         LocalConfigurationManager
         {
             RebootNodeIfNeeded = $true
-        }
-
-        xWaitforDisk Disk2
-        {
-                DiskNumber = 2
-                RetryIntervalSec =$RetryIntervalSec
-                RetryCount = $RetryCount
-        }
-
-        xDisk ADDataDisk
-        {
-            DiskNumber = 2
-            DriveLetter = "F"
-            DependsOn = "[xWaitForDisk]Disk2"
         }
 
         WindowsFeature ADDSInstall

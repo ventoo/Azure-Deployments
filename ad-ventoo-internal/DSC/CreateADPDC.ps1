@@ -6,10 +6,7 @@ configuration CreateADPDC
         [String]$DomainName,
 
         [Parameter(Mandatory)]
-        [System.Management.Automation.PSCredential]$Admincreds,
-
-        [Int]$RetryCount=20,
-        [Int]$RetryIntervalSec=30
+        [System.Management.Automation.PSCredential]$Admincreds
     )
 
     Import-DscResource -ModuleName xActiveDirectory, xStorage, xNetworking, PSDesiredStateConfiguration, xPendingReboot
@@ -56,19 +53,6 @@ configuration CreateADPDC
             DependsOn = "[WindowsFeature]DNS"
         }
 
-        xWaitforDisk Disk2
-        {
-            DiskNumber = 2
-            RetryIntervalSec =$RetryIntervalSec
-            RetryCount = $RetryCount
-        }
-
-        xDisk ADDataDisk {
-            DiskNumber = 2
-            DriveLetter = "F"
-            DependsOn = "[xWaitForDisk]Disk2"
-        }
-
         WindowsFeature ADDSInstall
         {
             Ensure = "Present"
@@ -95,10 +79,9 @@ configuration CreateADPDC
             DomainName = $DomainName
             DomainAdministratorCredential = $DomainCreds
             SafemodeAdministratorPassword = $DomainCreds
-            DatabasePath = "F:\NTDS"
-            LogPath = "F:\NTDS"
-            SysvolPath = "F:\SYSVOL"
-            DependsOn = @("[WindowsFeature]ADDSInstall", "[xDisk]ADDataDisk")
+            DatabasePath = "C:\NTDS"
+            LogPath = "C:\NTDS"
+            SysvolPath = "C:\SYSVOL"
         }
 
         xPendingReboot RebootAfterPromotion{
