@@ -29,7 +29,7 @@
     "imageSKU": "2016-Datacenter",
     "adAvailabilitySetName": "adAvailabiltySet",
     "publicIPAddressName": "ad-lb-pip",
-    "adVMSize": "Standard_DS2_v2",
+    "adVMSize": "Standard_D2s_v3",
     "adLBFE": "LBFE",
     "adLBBE": "LBBE",
     "adPDCRDPNAT": "adPDCRDP",
@@ -85,8 +85,12 @@
     {
       "name": "[variables('adAvailabilitySetName')]",
       "type": "Microsoft.Compute/availabilitySets",
-      "apiVersion": "2016-03-30",
-      "location": "[resourceGroup().location]"
+      "apiVersion": "2016-04-30-preview",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "platformFaultDomainCount": "1",
+        "managed": "true"
+      }
     },
     {
       "name": "[variables('adLBName')]",
@@ -209,7 +213,7 @@
     {
       "name": "[variables('adPDCVMName')]",
       "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2016-03-30",
+      "apiVersion": "2016-04-30-preview",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[resourceId('Microsoft.Network/networkInterfaces',variables('adPDCNicName'))]",
@@ -237,10 +241,7 @@
             "version": "latest"
           },
           "osDisk": {
-            "createOption": "FromImage",
-            "managedDisk": {
-              "storageAccountType": "Premium_LRS"
-            }
+            "createOption": "FromImage"
           }
         },
         "networkProfile": {
@@ -371,7 +372,7 @@
     {
       "name": "[variables('adBDCVMName')]",
       "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2016-03-30",
+      "apiVersion": "2016-04-30-preview",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[resourceId('Microsoft.Network/networkInterfaces',variables('adBDCNicName'))]",
@@ -399,10 +400,7 @@
             "version": "latest"
           },
           "osDisk": {
-            "createOption": "FromImage",
-            "managedDisk": {
-              "storageAccountType": "Premium_LRS"
-            }
+            "createOption": "FromImage"
           }
         },
         "networkProfile": {
