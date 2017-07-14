@@ -62,7 +62,7 @@
   },
   "resources": [
     {
-      "apiVersion": "2016-09-01",
+      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/virtualNetworks/subnets",
       "name": "[concat(variables('existingVirtualNetworkName'), '/', variables('adSubnetName'))]",
       "location": "[resourceGroup().location]",
@@ -145,6 +145,9 @@
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2016-10-01",
       "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[variables('adSubnetRef')]"
+      ],
       "properties": {
         "ipConfigurations": [
           {
@@ -175,6 +178,9 @@
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2016-10-01",
       "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[variables('adSubnetRef')]"
+      ],
       "properties": {
         "ipConfigurations": [
           {
@@ -284,6 +290,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2016-09-01",
       "dependsOn": [
+        "[variables('adSubnetRef')]",
         "[concat('Microsoft.Compute/virtualMachines/', variables('adPDCVMName'),'/extensions/CreateADForest')]"
       ],
       "properties": {
@@ -316,6 +323,7 @@
       "apiVersion": "2015-01-01",
       "dependsOn": [
         "[concat('Microsoft.Network/networkInterfaces/',variables('adBDCNicName'))]",
+        "[variables('adSubnetRef')]",
         "Microsoft.Resources/deployments/UpdateVNetDNS1"
       ],
       "properties": {
@@ -472,6 +480,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2016-09-01",
       "dependsOn": [
+        "[variables('adSubnetRef')]",
         "Microsoft.Resources/deployments/ConfiguringBackupADDomainController"
       ],
       "properties": {
