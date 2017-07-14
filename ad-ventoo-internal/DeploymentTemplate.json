@@ -29,7 +29,7 @@
     "imageSKU": "2016-Datacenter",
     "adAvailabilitySetName": "adAvailabiltySet",
     "publicIPAddressName": "ad-lb-pip",
-    "adVMSize": "Standard_D2s_v3",
+    "adVMSize": "Standard_A1",
     "adLBFE": "LBFE",
     "adLBBE": "LBBE",
     "adPDCRDPNAT": "adPDCRDP",
@@ -150,6 +150,7 @@
       "apiVersion": "2016-10-01",
       "location": "[resourceGroup().location]",
       "dependsOn": [
+        "[resourceId('Microsoft.Network/loadBalancers',variables('adLBName'))]",
         "[variables('adSubnetRef')]"
       ],
       "properties": {
@@ -183,6 +184,7 @@
       "apiVersion": "2016-10-01",
       "location": "[resourceGroup().location]",
       "dependsOn": [
+        "[resourceId('Microsoft.Network/loadBalancers',variables('adLBName'))]",
         "[variables('adSubnetRef')]"
       ],
       "properties": {
